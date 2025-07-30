@@ -63,3 +63,37 @@
 2025-06-12 16:03:01 - INFO - User 'admin' logged in successfully as admin.
 2025-06-12 16:03:34 - INFO - Course IT301 removed from student 1014.
 2025-06-12 16:03:34 - INFO - Student data saved to persistent storage.
+2025-07-30 19:15:42 - INFO - Student data loaded from persistent storage.
+2025-07-30 19:15:54 - WARNING - Failed login attempt with username 'student'.
+2025-07-30 19:16:00 - INFO - User 'admin' logged in successfully as admin.
+2025-07-30 19:27:20 - INFO - Student data loaded from persistent storage.
+2025-07-30 19:27:24 - INFO - User 'admin' logged in successfully as admin.
+2025-07-30 19:46:46 - INFO - Student data loaded from persistent storage.
+2025-07-30 19:46:48 - INFO - User 'admin' logged in successfully as admin.
+2025-07-30 19:53:19 - INFO - Student data loaded from persistent storage.
+2025-07-30 19:53:22 - INFO - User 'admin' logged in successfully as admin.
+2025-07-30 19:57:05 - INFO - Student data loaded from persistent storage.
+2025-07-30 20:00:29 - INFO - User 'admin' logged in successfully as admin.
+2025-07-30 20:02:25 - INFO - Student data loaded from persistent storage.
+2025-07-30 20:02:29 - INFO - User 'admin' logged in successfully as admin.
+2025-07-30 20:06:43 - INFO - Student data loaded from persistent storage.
+2025-07-30 20:07:08 - INFO - Student data loaded from persistent storage.
+2025-07-30 20:07:10 - INFO - Student data loaded from persistent storage.
+2025-07-30 20:07:33 - INFO - Student data loaded from persistent storage.
+2025-07-30 20:09:16 - INFO - Student data loaded from persistent storage.
+2025-07-30 20:09:21 - INFO - User 'admin' logged in successfully as admin.
+2025-07-30 20:16:43 - INFO - Student data loaded from persistent storage.
+2025-07-30 20:16:46 - WARNING - Failed login attempt with username 'admin'.
+2025-07-30 20:16:51 - INFO - User 'admin' logged in successfully as admin.
+2025-07-30 20:19:43 - INFO - Student data loaded from persistent storage.
+2025-07-30 20:19:45 - INFO - User 'admin' logged in successfully as admin.
+2025-07-30 20:21:48 - INFO - Student data loaded from persistent storage.
+2025-07-30 20:21:51 - INFO - User 'admin' logged in successfully as admin.
+2025-07-30 20:24:03 - INFO - Student data loaded from persistent storage.
+2025-07-30 20:24:06 - INFO - User 'admin' logged in successfully as admin.
+2025-07-30 20:27:13 - INFO - Student data loaded from persistent storage.
+2025-07-30 20:27:16 - INFO - User 'admin' logged in successfully as admin.
+2025-07-30 20:29:25 - INFO - Student data loaded from persistent storage.
+2025-07-30 20:29:28 - INFO - User 'admin' logged in successfully as admin.
+2025-07-30 20:37:12 - INFO - Student data loaded from persistent storage.
+2025-07-30 20:37:17 - INFO - User 'admin' logged in successfully as admin.

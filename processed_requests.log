@@ -1,0 +1,4 @@
+{"processed_at": "2025-07-30T12:32:02.819665+00:00", "student_id": 1012, "request_type": "Profile Update", "priority_level": 1, "request_details": "Change of address and phone number.", "timestamp": "2025-07-24T02:31:30.894311+00:00"}
+{"processed_at": "2025-07-30T12:32:12.346192+00:00", "student_id": 1002, "request_type": "Transcript Request", "priority_level": 1, "request_details": "Official transcript for internship.", "timestamp": "2025-07-25T05:14:03.894305+00:00"}
+{"processed_at": "2025-07-30T12:32:20.234905+00:00", "student_id": 1007, "request_type": "Course Enrollment", "priority_level": 1, "request_details": "Add CS101 to my schedule.", "timestamp": "2025-07-25T07:10:20.894291+00:00"}
+{"processed_at": "2025-07-30T12:37:59.892042+00:00", "student_id": 1007, "request_type": "Password Reset", "priority_level": 1, "request_details": "Forgot password, needs reset link.", "timestamp": "2025-07-24T00:36:44.063741+00:00"}
