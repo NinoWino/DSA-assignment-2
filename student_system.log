@@ -1,0 +1,65 @@
+2025-06-09 11:45:45 - INFO - User 'admin' logged in successfully as admin.
+2025-06-09 11:46:19 - INFO - Student 1005 - Maria Mary added.
+2025-06-09 11:47:00 - INFO - Course CS101 removed from student 1001.
+2025-06-09 11:47:00 - INFO - Student 1001 removed from course CS101.
+2025-06-09 11:47:53 - INFO - User 'admin' logged in successfully as admin.
+2025-06-09 11:59:45 - INFO - User 'admin' logged in successfully as admin.
+2025-06-09 12:00:19 - INFO - User 'admin' logged in successfully as admin.
+2025-06-09 12:03:23 - WARNING - Failed login attempt with username 'admin123'.
+2025-06-09 12:03:29 - WARNING - Failed login attempt with username 'admin123'.
+2025-06-09 12:03:32 - INFO - User 'admin' logged in successfully as admin.
+2025-06-09 12:04:57 - INFO - User 'admin' logged in successfully as admin.
+2025-06-09 12:05:44 - INFO - User 'admin' logged in successfully as admin.
+2025-06-09 12:05:59 - INFO - Student data saved to persistent storage.
+2025-06-09 12:06:09 - INFO - Student data loaded from persistent storage.
+2025-06-09 12:06:13 - INFO - User 'admin' logged in successfully as admin.
+2025-06-09 12:06:41 - INFO - User 'student' logged in successfully as student.
+2025-06-09 12:09:47 - INFO - Student data loaded from persistent storage.
+2025-06-09 12:09:50 - INFO - User 'admin' logged in successfully as admin.
+2025-06-09 12:10:39 - INFO - Student 1005 - Alice Boo added.
+2025-06-09 12:10:39 - INFO - Student data saved to persistent storage.
+2025-06-09 12:11:22 - INFO - Student 1006 - Johan Power added.
+2025-06-09 12:11:22 - INFO - Student data saved to persistent storage.
+2025-06-09 12:16:06 - INFO - Student data loaded from persistent storage.
+2025-06-09 12:16:09 - INFO - User 'admin' logged in successfully as admin.
+2025-06-09 12:20:04 - INFO - Student data loaded from persistent storage.
+2025-06-09 12:22:56 - INFO - Student data loaded from persistent storage.
+2025-06-09 12:23:12 - INFO - Student data loaded from persistent storage.
+2025-06-09 12:25:36 - INFO - Student data loaded from persistent storage.
+2025-06-09 12:25:41 - WARNING - Failed login attempt with username 'Admin'.
+2025-06-09 12:25:45 - INFO - User 'admin' logged in successfully as admin.
+2025-06-09 12:25:53 - INFO - Search performed for student: 1003
+2025-06-09 12:26:27 - INFO - Course CS101 removed from student 1001.
+2025-06-09 12:26:27 - INFO - Student 1001 removed from course CS101.
+2025-06-09 12:26:27 - INFO - Student data saved to persistent storage.
+2025-06-09 12:27:12 - INFO - User 'student' logged in successfully as student.
+2025-06-09 12:27:19 - INFO - Search performed for student: 1004
+2025-06-09 12:35:56 - INFO - Student data loaded from persistent storage.
+2025-06-09 12:35:59 - INFO - User 'admin' logged in successfully as admin.
+2025-06-09 12:39:10 - INFO - Student data loaded from persistent storage.
+2025-06-09 12:39:12 - INFO - User 'admin' logged in successfully as admin.
+2025-06-09 12:39:34 - INFO - Student data loaded from persistent storage.
+2025-06-09 12:39:36 - INFO - User 'admin' logged in successfully as admin.
+2025-06-09 12:42:09 - INFO - Student data loaded from persistent storage.
+2025-06-09 12:42:38 - INFO - User 'admin' logged in successfully as admin.
+2025-06-09 12:43:54 - INFO - Student 1007 - Johan Power added.
+2025-06-09 12:43:54 - INFO - Student data saved to persistent storage.
+2025-06-09 12:44:12 - INFO - Student 1001 enrolled in course MA201.
+2025-06-09 12:44:12 - INFO - Student data saved to persistent storage.
+2025-06-09 12:45:08 - INFO - Search performed for student: 1001
+2025-06-09 12:45:17 - INFO - Search performed for student: Johan Power
+2025-06-09 12:46:14 - INFO - Student data loaded from persistent storage.
+2025-06-09 12:46:17 - INFO - User 'admin' logged in successfully as admin.
+2025-06-09 12:48:03 - INFO - Student data saved to persistent storage.
+2025-06-09 12:51:46 - INFO - Student data loaded from persistent storage.
+2025-06-09 12:51:49 - INFO - User 'admin' logged in successfully as admin.
+2025-06-09 12:52:08 - INFO - Search performed for student: Johan Power
+2025-06-09 12:52:30 - INFO - Student data loaded from persistent storage.
+2025-06-09 12:52:33 - INFO - User 'admin' logged in successfully as admin.
+2025-06-09 12:52:46 - INFO - Search performed for student: Johan Power
+2025-06-11 13:53:06 - INFO - Student data loaded from persistent storage.
+2025-06-11 13:53:09 - INFO - User 'admin' logged in successfully as admin.
+2025-06-12 16:02:56 - INFO - Student data loaded from persistent storage.
+2025-06-12 16:03:01 - INFO - User 'admin' logged in successfully as admin.
+2025-06-12 16:03:34 - INFO - Course IT301 removed from student 1014.
+2025-06-12 16:03:34 - INFO - Student data saved to persistent storage.
