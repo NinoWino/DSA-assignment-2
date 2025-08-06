@@ -1,5 +1,4 @@
 import re
-import os
 import pickle
 import hashlib
 from openpyxl import Workbook, load_workbook
@@ -13,6 +12,11 @@ from collections import Counter
 import random
 from models import Student, StudentRequest, RequestQueue, StudentBST
 from graphviz import Digraph
+import os
+from dotenv import load_dotenv
+import requests
+import time
+load_dotenv()
 
 init(autoreset=True)
 
@@ -25,6 +29,21 @@ logging.basicConfig(
 
 STORAGE_FILE = "student_data.pkl"
 student_tree = StudentBST()
+
+REQUEST_FILE = "requests_data.json"
+
+def save_requests():
+    with open(REQUEST_FILE, "w") as f:
+        f.write(request_queue.to_json())
+    logging.info("Request queue saved.")
+
+def load_requests():
+    global request_queue
+    if os.path.exists(REQUEST_FILE):
+        with open(REQUEST_FILE) as f:
+            request_queue = RequestQueue.from_json(f.read())
+        logging.info("Request queue loaded.")
+
 
 def save_data():
     with open(STORAGE_FILE, 'wb') as f:
@@ -456,14 +475,17 @@ def undo_action():
     if action == "enqueue":
         # undo enqueue => remove that specific request
         request_queue.remove_request(req.request_id)
+        save_requests()  # ✅ persist change
         print(f"Undid enqueue of {req}")
         redo_stack.append(("enqueue", req))
 
     elif action == "dequeue":
         # undo dequeue => re-enqueue the same request
         request_queue.enqueue(req)
+        save_requests()  # ✅ persist change
         print(f"Undid dequeue (re-enqueued) {req}")
         redo_stack.append(("dequeue", req))
+
 
 def redo_action():
     if not redo_stack:
@@ -474,14 +496,17 @@ def redo_action():
     if action == "enqueue":
         # redo enqueue => put it back
         request_queue.enqueue(req)
+        save_requests()  # ✅ persist change
         print(f"Redid enqueue of {req}")
         undo_stack.append(("enqueue", req))
 
     elif action == "dequeue":
         # redo dequeue => remove next (should be that req)
         request_queue.remove_request(req.request_id)
+        save_requests()  # ✅ persist change
         print(f"Redid dequeue (removed) {req}")
         undo_stack.append(("dequeue", req))
+
 
 def view_requests_menu():
     pending = request_queue.list_all()
@@ -543,7 +568,6 @@ def add_request_action():
     Prompt for and enqueue a new StudentRequest, recording the action
     on the undo stack for later undo/redo.
     """
-    # 1) Get and validate Student ID
     sid_input = input("Student ID: ").strip()
     try:
         sid = int(sid_input)
@@ -555,7 +579,6 @@ def add_request_action():
         print(f"{Fore.RED}Student ID {sid} not found in system. Cannot add request.{Style.RESET_ALL}")
         return
 
-    # 2) Check for existing requests for this student
     existing = [r for r in request_queue.list_all() if r.student_id == sid]
     if existing:
         confirm = input(
@@ -567,7 +590,6 @@ def add_request_action():
             print(f"{Fore.CYAN}Request not added.{Style.RESET_ALL}")
             return
 
-    # 3) Prompt for request details
     rtype = input("Request Type: ").strip()
     if not rtype:
         print(f"{Fore.RED}Request Type cannot be empty.{Style.RESET_ALL}")
@@ -585,14 +607,15 @@ def add_request_action():
         print(f"{Fore.RED}Request Details cannot be empty.{Style.RESET_ALL}")
         return
 
-    # 4) Create, enqueue, and record undo
     req = StudentRequest(sid, rtype, prio, details)
     request_queue.enqueue(req)
+    save_requests()  # ✅ <-- persist change
     undo_stack.append(("enqueue", req))
     redo_stack.clear()
 
     logging.info(f"Enqueued request: {req!r}")
     print(f"{Fore.GREEN}Enqueued: {req}{Style.RESET_ALL}")
+
 
 
 
@@ -687,29 +710,22 @@ def generate_dummy_requests(n):
         "Grade Appeal": "Review grade for assignment 3.",
         "Fee Waiver": "Request waiver for late payment fee."
     }
-    # if you want realistic student IDs, pick from your existing students:
+
     existing_ids = list(student_tree.keys())
     for _ in range(n):
-        # pick a student ID (or make up a random one if list is empty)
         sid = random.choice(existing_ids) if existing_ids else random.randint(10000, 99999)
-
-        # pick a request type
         rtype = random.choice(sample_types)
-
-        # priority 1–5
         prio = random.randint(1, 5)
-
-        # details based on type
         details = sample_details[rtype]
-
-        # timestamp anywhere in the past week
         delta_secs = random.randint(0, 7 * 24 * 3600)
         ts = datetime.now(timezone.utc) - timedelta(seconds=delta_secs)
 
         req = StudentRequest(sid, rtype, prio, details, timestamp=ts)
         request_queue.enqueue(req)
 
+    save_requests()  # ✅ persist to file
     print(f"Enqueued {n} dummy requests.")
+
 
 def dashboard_summary():
     """
@@ -787,6 +803,69 @@ def login():
         print("Invalid username or password.")
         return None
 
+def ai_course_advisory():
+    print("\n🤖 AI Course Advisor (OpenRouter) — type 'exit' to return.\n")
+
+    while True:
+        user_input = input("You: ").strip()
+        if user_input.lower() in {"exit", "quit"}:
+            print("Exiting advisor...")
+            break
+
+        headers = {
+            "Authorization": f"Bearer {os.getenv('OPENROUTER_API_KEY')}",
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://chat.openai.com",
+            "X-Title": "CourseAdvisorCLI"
+        }
+
+        payload = {
+            "model": "mistralai/mistral-7b-instruct",  # ✅ active and free
+            "messages": [
+                {"role": "system", "content": (
+                    "You are a helpful and friendly university course advisor. "
+                    "Help students choose suitable university courses based on interests, goals, and workload.")},
+                {"role": "user", "content": user_input}
+            ]
+        }
+
+        print("Thinking...", end="", flush=True)
+        time.sleep(1)
+
+        try:
+            response = requests.post("https://openrouter.ai/api/v1/chat/completions",
+                                     headers=headers, json=payload)
+
+            if response.status_code == 200:
+                reply = response.json()["choices"][0]["message"]["content"]
+                print(f"\nAdvisor: {reply}\n")
+            else:
+                print(f"\n⚠️ API Error: {response.status_code} - {response.text}\n")
+
+        except requests.RequestException as e:
+            print(f"\n⚠️ Request failed: {e}\n")
+
+def fix_encrypted_emails():
+    fixed = 0
+    for student in student_tree.values():
+        if "<decrypt_error>" in student.email:
+            try:
+                # email is invalid, probably not encrypted yet
+                raw_email = getattr(student, '__dict__', {}).get('email')
+                if raw_email:
+                    student.email = raw_email  # triggers encryption setter
+                    del student.__dict__['email']  # cleanup
+                    fixed += 1
+            except Exception:
+                continue
+    if fixed > 0:
+        print(f"🔧 Fixed {fixed} students with unencrypted email.")
+        save_data()
+    else:
+        print("✅ All emails already encrypted properly.")
+
+
+
 def user(role):
     while True:
         print("\nStudent Course Registration System")
@@ -810,17 +889,19 @@ def user(role):
             print("16. Undo Last Queue Action")
             print("17. Redo Last Queue Action")
             print("18. Dashboard Summary")
-            print("19. Logout")
-            print("20. Exit")
-            print("21. Show BST Structure")
-            print("22. Show Student Course History")
+            print("19. Show BST Structure")
+            print("20. Show Student Course History")
+            print("21. AI Course Advisor")
+            print("22. Logout")
+            print("23. Exit")
 
         elif role == "student":
             print(" 1. Display All Students")
             print(" 2. Search Student by ID or Name")
             print(" 3. View My Course History")
-            print(" 4. Logout")
-            print(" 5. Exit")
+            print(" 4. AI Course Advisor")
+            print(" 5. Logout")
+            print(" 6. Exit")
 
         choice = input("Enter your choice: ").strip()
 
@@ -862,17 +943,11 @@ def user(role):
             elif choice == '18':
                 dashboard_summary()
             elif choice == '19':
-                print("Logging out...")
-                return
-            elif choice == '20':
-                print("Exiting program.")
-                exit()
-            elif choice == '21':
                 print("\n── Student BST Structure ──")
                 student_tree.print_tree()
-            elif choice == '22':
+            elif choice == '20':
                 try:
-                    sid = int(input("Enter student ID to view course registration history: ").strip())
+                    sid = int(input("Enter student ID to view history: ").strip())
                     student = student_tree.search(sid)
                     if student:
                         student.display_history()
@@ -880,6 +955,14 @@ def user(role):
                         print("Student ID not found.")
                 except ValueError:
                     print("Invalid ID format.")
+            elif choice == '21':
+                ai_course_advisory()
+            elif choice == '22':
+                print("Logging out...")
+                return
+            elif choice == '23':
+                print("Exiting program.")
+                exit()
             else:
                 print("Invalid choice.")
 
@@ -890,7 +973,7 @@ def user(role):
                 search_student()
             elif choice == '3':
                 try:
-                    sid = int(input("Enter student ID to view course registration history: ").strip())
+                    sid = int(input("Enter your student ID: ").strip())
                     student = student_tree.search(sid)
                     if student:
                         student.display_history()
@@ -899,9 +982,11 @@ def user(role):
                 except ValueError:
                     print("Invalid ID format.")
             elif choice == '4':
+                ai_course_advisory()
+            elif choice == '5':
                 print("Logging out...")
                 return
-            elif choice == '5':
+            elif choice == '6':
                 print("Exiting program.")
                 exit()
             else:
@@ -911,9 +996,12 @@ def user(role):
 if __name__ == "__main__":
     try:
         load_data()
-        generate_dummy_requests(50)
-        # print("\n⎯⎯ Current Student BST ⎯⎯")
-        # student_tree.print_tree()
+        load_requests()  # ✅ Load requests
+        # student = student_tree.search(1001)
+        # print(student._encrypted_email)
+        if request_queue.is_empty():
+            generate_dummy_requests(50)
+        fix_encrypted_emails()  # optional
         while True:
             role = login()
             if role:
@@ -925,3 +1013,4 @@ if __name__ == "__main__":
                     break
     except Exception as e:
         print("\nExiting Program due to unexpected error:", e)
+

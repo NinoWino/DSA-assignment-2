@@ -4,25 +4,81 @@ import heapq
 import itertools
 import json
 from datetime import datetime, timezone
+import base64
 from colorama import Fore, Style, init
 
 # counter for unique request IDs
 _request_id_counter = itertools.count(1)
 
+_ENCRYPTION_KEY = "mysecretkey"
+
+def _xor_cipher(data: str) -> bytes:
+    key = _ENCRYPTION_KEY
+    return bytes([ord(data[i]) ^ ord(key[i % len(key)]) for i in range(len(data))])
+
+def encrypt_field(plaintext: str) -> str:
+    """Encrypts plaintext string to base64-encoded ciphertext."""
+    cipher_bytes = _xor_cipher(plaintext)
+    return base64.b64encode(cipher_bytes).decode('utf-8')
+
+def decrypt_field(ciphertext: str) -> str:
+    """Decrypts base64-encoded ciphertext back to plaintext."""
+    cipher_bytes = base64.b64decode(ciphertext.encode('utf-8'))
+    plain_chars = [chr(cipher_bytes[i] ^ ord(_ENCRYPTION_KEY[i % len(_ENCRYPTION_KEY)])) for i in range(len(cipher_bytes))]
+    return ''.join(plain_chars)
+
+class CourseHistoryNode:
+    """
+    A node in the linked list tracking a single course add/remove event.
+    """
+    def __init__(self, course_code: str, action: str, timestamp: datetime = None):
+        self.course_code = course_code
+        self.action = action  # 'add' or 'remove'
+        self.timestamp = timestamp or datetime.now()
+        self.next = None
 
 class Student:
     def __init__(self, name, student_id, email, course_list, year_of_study, is_full_time):
         self.name = name
         self.student_id = student_id
-        self.email = email
+        # store encrypted email
+        self._encrypted_email = encrypt_field(email)
         self.course_list = course_list
         self.year_of_study = year_of_study
         self.is_full_time = is_full_time
+        # head of the linked list of history events
+        self.history_head: CourseHistoryNode | None = None
+
+    def __setstate__(self, state):
+        # support unpickling older Student instances without history_head or encrypted_email
+        self.__dict__.update(state)
+        # migrate plaintext email if needed
+        if hasattr(self, 'email') and not hasattr(self, '_encrypted_email'):
+            self._encrypted_email = encrypt_field(self.email)
+        if not hasattr(self, 'history_head'):
+            self.history_head = None
+
+    @property
+    def email(self) -> str:
+        """Decrypt and return the student's email."""
+        try:
+            return decrypt_field(self._encrypted_email)
+        except Exception:
+            return "<decrypt_error>"
+
+    @email.setter
+    def email(self, value: str):
+        """Encrypt and store the student's email."""
+        self._encrypted_email = encrypt_field(value)
 
     def add_course(self, course):
         if course not in self.course_list:
             self.course_list.append(course)
             logging.info(f"Course {course} added to student {self.student_id}.")
+            # record history event
+            node = CourseHistoryNode(course, 'add')
+            node.next = self.history_head
+            self.history_head = node
         else:
             print("Course already registered")
 
@@ -30,6 +86,10 @@ class Student:
         if course in self.course_list:
             self.course_list.remove(course)
             logging.info(f"Course {course} removed from student {self.student_id}.")
+            # record history event
+            node = CourseHistoryNode(course, 'remove')
+            node.next = self.history_head
+            self.history_head = node
         else:
             print("Course not found")
 
@@ -55,6 +115,7 @@ class Student:
             ts = node.timestamp.strftime('%Y-%m-%d %H:%M:%S')
             print(f"  {ts}: {node.action.upper()} {node.course_code}")
             node = node.next
+
 
 
 class StudentRequest:
@@ -295,12 +356,4 @@ class StudentBST:
                             prefix + ("    " if is_left else "│   "),
                             is_left=True)
 
-class CourseHistoryNode:
-    """
-    A node in the linked list tracking a single course add/remove event.
-    """
-    def __init__(self, course_code: str, action: str, timestamp: datetime = None):
-        self.course_code = course_code
-        self.action = action  # 'add' or 'remove'
-        self.timestamp = timestamp or datetime.now()
-        self.next = None
+
