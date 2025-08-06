@@ -11,7 +11,8 @@ import itertools
 import json
 from collections import Counter
 import random
-
+from models import Student, StudentRequest, RequestQueue, StudentBST
+from graphviz import Digraph
 
 init(autoreset=True)
 
@@ -23,52 +24,35 @@ logging.basicConfig(
 )
 
 STORAGE_FILE = "student_data.pkl"
-
-class Student:
-    def __init__(self, name, student_id, email, course_list, year_of_study, is_full_time):
-        self.name = name
-        self.student_id = student_id
-        self.email = email
-        self.course_list = course_list
-        self.year_of_study = year_of_study
-        self.is_full_time = is_full_time
-
-    def add_course(self, course):
-        if course not in self.course_list:
-            self.course_list.append(course)
-            logging.info(f"Course {course} added to student {self.student_id}.")
-        else:
-            print("Course already registered")
-
-    def remove_course(self, course):
-        if course in self.course_list:
-            self.course_list.remove(course)
-            logging.info(f"Course {course} removed from student {self.student_id}.")
-        else:
-            print("Course not found")
-
-    def display_details(self):
-        print(f"{Fore.CYAN}Name: {Fore.YELLOW}{self.name}")
-        print(f"{Fore.CYAN}ID: {Fore.YELLOW}{self.student_id}")
-        print(f"{Fore.CYAN}Email: {Fore.YELLOW}{self.email}")
-        print(f"{Fore.CYAN}Courses: {Fore.YELLOW}{', '.join(self.course_list)}")
-        print(f"{Fore.CYAN}Year of Study: {Fore.YELLOW}{self.year_of_study}")
-        print(f"{Fore.CYAN}Full-time: {Fore.YELLOW}{'Yes' if self.is_full_time else 'No'}")
-        print(Fore.MAGENTA + "-" * 40)
-
-student_registration_list = {}
+student_tree = StudentBST()
 
 def save_data():
     with open(STORAGE_FILE, 'wb') as f:
-        pickle.dump(student_registration_list, f)
+        pickle.dump(student_tree, f)
     logging.info("Student data saved to persistent storage.")
 
 def load_data():
-    global student_registration_list
-    if os.path.exists(STORAGE_FILE):
-        with open(STORAGE_FILE, 'rb') as f:
-            student_registration_list = pickle.load(f)
-        logging.info("Student data loaded from persistent storage.")
+    global student_tree
+    if not os.path.exists(STORAGE_FILE):
+        return
+
+    with open(STORAGE_FILE, 'rb') as f:
+        data = pickle.load(f)
+
+    # if it’s still the old dict format, re-build the BST
+    if isinstance(data, dict):
+        old_dict = data
+        bst = StudentBST()
+        for student in old_dict.values():
+            bst.insert(student)
+        student_tree = bst
+        logging.info("Migrated old dict data into StudentBST.")
+    # if it’s already a BST, just assign it
+    elif isinstance(data, StudentBST):
+        student_tree = data
+        logging.info("Loaded StudentBST from storage.")
+    else:
+        raise RuntimeError(f"Unexpected data type in {STORAGE_FILE}: {type(data)}")
 
 def valid_email_format(email):
     return re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email)
@@ -77,15 +61,17 @@ def valid_course_code(course):
     return re.match(r"^[A-Z]{2,4}\d{3}$", course)
 
 def display_all_students():
-    if not student_registration_list:
-        print("No students registered.")
-    for student in student_registration_list.values():
+    any_printed = False
+    for student in student_tree.in_order_traversal():
         student.display_details()
+        any_printed = True
+    if not any_printed:
+        print("No students registered.")
 
 def add_student():
     try:
         student_id = int(input("What is the student ID: "))
-        if student_id in student_registration_list:
+        if student_tree.search(student_id) is not None:
             print("Student ID already registered.")
             return
 
@@ -116,9 +102,10 @@ def add_student():
             print("Please enter YES or NO.")
             return
 
-        student_registration_list[student_id] = Student(
+        new_student = Student(
             name, student_id, email, course_list, year_of_study, full_time
         )
+        student_tree.insert(new_student)
         logging.info(f"Student {student_id} - {name} added.")
         save_data()
         print("Student successfully added.")
@@ -128,38 +115,67 @@ def add_student():
         print(str(e))
 
 def enroll_course():
+    """
+    Prompt for a student ID and a course code, validate both,
+    then enroll the student in the course (if not already enrolled).
+    """
     try:
-        stud_id = int(input("Enter student ID: "))
-        if stud_id in student_registration_list:
-            course = input("Enter course code to enroll: ").strip().upper()
-            if not valid_course_code(course):
-                print("Invalid course code format. Format must be like CS123.")
-                return
-            student_registration_list[stud_id].add_course(course)
-            save_data()
-        else:
-            print("Student ID not found.")
+        stud_id = int(input("Enter student ID: ").strip())
     except ValueError:
         print("Invalid input. Student ID must be a number.")
+        return
+
+    student = student_tree.search(stud_id)
+    if not student:
+        print("Student ID not found.")
+        return
+
+    course = input("Enter course code to enroll: ").strip().upper()
+    if not valid_course_code(course):
+        print("Invalid course code format. Format must be like CS123.")
+        return
+
+    if course in student.course_list:
+        print(f"Student {stud_id} is already enrolled in {course}.")
+        return
+
+    student.add_course(course)
+    save_data()
+    logging.info(f"Student {stud_id} enrolled in course {course}.")
+    print(f"Course {course} successfully added to student {stud_id}.")
 
 def remove_student_course():
+    """
+    Prompt for a student ID and a course code, validate both,
+    then remove the course from the student's list (if present).
+    """
     try:
-        stud_id = int(input("Enter student ID: "))
-        if stud_id in student_registration_list:
-            course = input("Enter course code to remove: ").strip().upper()
-            if course in student_registration_list[stud_id].course_list:
-                student_registration_list[stud_id].remove_course(course)
-                save_data()
-                print("Course successfully removed.")
-            else:
-                print("Course not found.")
-        else:
-            print("Student ID not found.")
+        stud_id = int(input("Enter student ID: ").strip())
     except ValueError:
         print("Invalid input. Student ID must be a number.")
+        return
+
+    student = student_tree.search(stud_id)
+    if not student:
+        print("Student ID not found.")
+        return
+
+    course = input("Enter course code to remove: ").strip().upper()
+    if not valid_course_code(course):
+        print("Invalid course code format. Format must be like CS123.")
+        return
+
+    if course not in student.course_list:
+        print(f"Course {course} not found for student {stud_id}.")
+        return
+
+    student.remove_course(course)
+    save_data()
+    logging.info(f"Course {course} removed from student {stud_id}.")
+    print(f"Course {course} successfully removed from student {stud_id}.")
 
 def bubble_sort_year_of_study():
-    sorted_list = list(student_registration_list.values())
+    sorted_list = list(student_tree.values())
     for i in range(len(sorted_list)):
         for j in range(0, len(sorted_list) - i - 1):
             if sorted_list[j].year_of_study > sorted_list[j + 1].year_of_study:
@@ -169,7 +185,7 @@ def bubble_sort_year_of_study():
         s.display_details()
 
 def selection_sort_num_reg_course():
-    sorted_list = list(student_registration_list.values())
+    sorted_list = list(student_tree.values())
     n = len(sorted_list)
     for i in range(n):
         max_index = i
@@ -188,13 +204,14 @@ def search_student():
 
     try:
         key_id = int(key)
-        if key_id in student_registration_list:
-            student_registration_list[key_id].display_details()
+        student = student_tree.search(key_id)
+        if student:
+            student.display_details()
             return
     except ValueError:
         pass
 
-    for student in student_registration_list.values():
+    for student in student_tree.in_order_traversal():
         if student.name.lower() == key.lower():
             student.display_details()
             found = True
@@ -203,7 +220,7 @@ def search_student():
         print("Student not found.")
 
 def export_to_excel():
-    if not student_registration_list:
+    if not student_tree:
         print("No students to export.")
         return
 
@@ -216,7 +233,7 @@ def export_to_excel():
     ws.title = "Students"
     ws.append(["Student ID", "Name", "Email", "Courses", "Year of Study", "Full-time"])
 
-    for student in student_registration_list.values():
+    for student in student_tree.values():
         ws.append([
             student.student_id,
             student.name,
@@ -233,22 +250,42 @@ def export_to_excel():
         print("Failed to save Excel file:", e)
 
 def import_from_excel():
+    """
+    Prompt for an Excel file, read each row as a Student,
+    and insert or update into our BST (student_tree).
+    """
     filename = input("Enter the Excel filename to import (e.g., student_data.xlsx): ").strip()
     try:
         wb = load_workbook(filename)
         ws = wb.active
 
         for row in ws.iter_rows(min_row=2, values_only=True):
-            student_id = int(row[0])
-            name = row[1]
-            email = row[2]
-            course_list = [course.strip().upper() for course in row[3].split(',')] if row[3] else []
+            student_id    = int(row[0])
+            name          = row[1]
+            email         = row[2]
+            course_list   = [c.strip().upper() for c in row[3].split(',')] if row[3] else []
             year_of_study = int(row[4])
-            is_full_time = True if row[5].strip().lower() == "yes" else False
+            is_full_time  = row[5].strip().lower() == "yes"
 
-            student_registration_list[student_id] = Student(
-                name, student_id, email, course_list, year_of_study, is_full_time
+            # Build a Student object
+            new_student = Student(
+                name, student_id, email,
+                course_list, year_of_study, is_full_time
             )
+
+            existing = student_tree.search(student_id)
+            if existing:
+                # update existing student
+                existing.name          = name
+                existing.email         = email
+                existing.course_list   = course_list
+                existing.year_of_study = year_of_study
+                existing.is_full_time  = is_full_time
+                logging.info(f"Updated student {student_id} from Excel import.")
+            else:
+                # insert a new student node
+                student_tree.insert(new_student)
+                logging.info(f"Imported new student {student_id} from Excel.")
 
         save_data()
         print(f"Student data successfully imported from '{filename}'.")
@@ -256,6 +293,7 @@ def import_from_excel():
         print(f"File '{filename}' not found.")
     except Exception as e:
         print("Failed to import Excel file:", e)
+
 
 def quick_sort_students(students):
     if len(students) <= 1:
@@ -280,7 +318,7 @@ def quick_sort_students(students):
 
 
 def quick_sort_year_name():
-    students = list(student_registration_list.values())
+    students = list(student_tree.values())
     if not students:
         print("No students to sort.")
         return
@@ -352,7 +390,7 @@ def merge_sort_students(students):
 
 
 def merge_sort_by_courses_and_id():
-    students = list(student_registration_list.values())
+    students = list(student_tree.values())
     if not students:
         print("No students in the system.")
         return
@@ -404,135 +442,46 @@ def merge_sort_by_courses_and_id():
         line = " | ".join(row[i].ljust(col_widths[i]) for i in range(len(headers)))
         print(f"{color}{line}{Style.RESET_ALL}")
 
-# in your module scope:
-_request_id_counter = itertools.count(1)
-
-class StudentRequest:
-    def __init__(self, student_id, request_type, priority_level, request_details, timestamp=None, request_id=None):
-        # assign a unique request_id if one wasn’t passed
-        self.request_id = request_id or next(_request_id_counter)
-        self.student_id = student_id
-        self.request_type = request_type
-        self.priority_level = priority_level
-        self.request_details = request_details
-        self.timestamp = timestamp or datetime.now(timezone.utc)
-
-    def __repr__(self):
-        ts = self.timestamp.strftime("%Y-%m-%d %H:%M:%S")
-        return (f"<Req req_id={self.request_id} stud_id={self.student_id!r} "
-                f"type={self.request_type!r} prio={self.priority_level} time={ts}>")
-
-
-    def to_dict(self):
-        """Serialize this request to a JSON‐friendly dict."""
-        return {
-            "student_id":      self.student_id,
-            "request_type":    self.request_type,
-            "priority_level":  self.priority_level,
-            "request_details": self.request_details,
-            # ISO format so it’s easy to parse back
-            "timestamp":       self.timestamp.isoformat()
-        }
-
-    @classmethod
-    def from_dict(cls, d):
-        """Reconstruct a StudentRequest from a dict (e.g. loaded from JSON)."""
-        ts = datetime.fromisoformat(d["timestamp"])
-        return cls(d["student_id"], d["request_type"],
-                   d["priority_level"], d["request_details"],
-                   timestamp=ts)
-
-    def __str__(self):
-        ts = self.timestamp.strftime("%Y-%m-%d %H:%M:%S")
-        return (
-            f"[Req {self.request_id:>3}]  "
-            f"Student:{self.student_id:<6}  "
-            f"Type:{self.request_type:<15}  "
-            f"Prio:{self.priority_level:<2}  "
-            f"Time:{ts}"
-        )
-
-
-
-class RequestQueue:
-    def __init__(self):
-        # the heap will store tuples: (priority_level, timestamp, counter, StudentRequest)
-        self._heap    = []
-        self._counter = itertools.count()
-
-    def enqueue(self, req: StudentRequest):
-        """Add a new StudentRequest to the queue."""
-        count = next(self._counter)
-        heapq.heappush(self._heap, (req.priority_level, req.timestamp, count, req))
-
-    def bulk_enqueue(self, requests):
-        """Enqueue a list (or any iterable) of StudentRequest objects."""
-        for req in requests:
-            self.enqueue(req)
-
-    def dequeue(self):
-        """Pop and return the highest-priority StudentRequest, or None if empty."""
-        if not self._heap:
-            return None
-        _, _, _, req = heapq.heappop(self._heap)
-        return req
-
-    def peek(self):
-        """Return the next StudentRequest without removing it."""
-        if not self._heap:
-            return None
-        return self._heap[0][3]
-
-    def is_empty(self):
-        return not self._heap
-
-    def size(self):
-        return len(self._heap)
-
-    def remove_by_student_id(self, sid):
-        """
-        Remove *all* requests matching the given student_id.
-        Rebuilds the heap in O(n).
-        """
-        filtered = [(p, t, c, r) for (p, t, c, r) in self._heap if r.student_id != sid]
-        self._heap = filtered
-        heapq.heapify(self._heap)
-
-    def list_all(self):
-        """Return a sorted list of all pending requests (by priority then time)."""
-        return [tup[3] for tup in sorted(self._heap)]
-
-    def to_json(self):
-        """
-        Serialize the queue to a JSON string.
-        You could also write this out to a file, or to a DB field.
-        """
-        # We sort so that JSON order matches processing order
-        data = [req.to_dict() for req in self.list_all()]
-        return json.dumps(data, indent=2)
-
-    @classmethod
-    def from_json(cls, json_str):
-        """
-        Reconstruct a RequestQueue from a JSON string as produced by to_json().
-        """
-        data = json.loads(json_str)
-        q = cls()
-        for item in data:
-            req = StudentRequest.from_dict(item)
-            q.enqueue(req)
-        return q
-
 # --- Example menu integration ---
 request_queue = RequestQueue()
+undo_stack = []
+redo_stack = []
 
-def process_request_menu():
-    if request_queue.is_empty():
-        print("No pending requests.")
+def undo_action():
+    if not undo_stack:
+        print("Nothing to undo.")
         return
-    req = request_queue.dequeue()
-    print(f"Processing: {req}")
-    # → here you’d put your real processing logic
+
+    action, req = undo_stack.pop()
+    if action == "enqueue":
+        # undo enqueue => remove that specific request
+        request_queue.remove_request(req.request_id)
+        print(f"Undid enqueue of {req}")
+        redo_stack.append(("enqueue", req))
+
+    elif action == "dequeue":
+        # undo dequeue => re-enqueue the same request
+        request_queue.enqueue(req)
+        print(f"Undid dequeue (re-enqueued) {req}")
+        redo_stack.append(("dequeue", req))
+
+def redo_action():
+    if not redo_stack:
+        print("Nothing to redo.")
+        return
+
+    action, req = redo_stack.pop()
+    if action == "enqueue":
+        # redo enqueue => put it back
+        request_queue.enqueue(req)
+        print(f"Redid enqueue of {req}")
+        undo_stack.append(("enqueue", req))
+
+    elif action == "dequeue":
+        # redo dequeue => remove next (should be that req)
+        request_queue.remove_request(req.request_id)
+        print(f"Redid dequeue (removed) {req}")
+        undo_stack.append(("dequeue", req))
 
 def view_requests_menu():
     pending = request_queue.list_all()
@@ -547,47 +496,10 @@ def student_exists(sid):
     Sequentially search through student_registration_list
     to see if a student with ID==sid is registered.
     """
-    for key in student_registration_list.keys():
+    for key in student_tree.keys():
         if key == sid:
             return True
     return False
-
-def add_request_menu():
-    sid_input = input("Student ID: ").strip()
-    try:
-        sid = int(sid_input)
-    except ValueError:
-        print("Invalid Student ID format.")
-        return
-
-    # 3b. Validate student exists
-    if not student_exists(sid):
-        print(f"Student ID {sid} not found in system. Cannot add request.")
-        return
-
-    # 3b. Check for existing requests for this student (sequential search)
-    existing = [r for r in request_queue.list_all() if r.student_id == sid]
-    if existing:
-        confirm = input(
-            f"Student {sid} already has {len(existing)} pending request(s). "
-            "Add another? (YES/NO): "
-        ).strip().upper()
-        if confirm != "YES":
-            print("Request not added.")
-            return
-
-    # — then your original prompts:
-    rtype = input("Request Type: ").strip()
-    try:
-        prio = int(input("Priority Level (integer, lower=more urgent): ").strip())
-    except ValueError:
-        print("Invalid priority; must be an integer.")
-        return
-    details = input("Request Details: ").strip()
-
-    req = StudentRequest(sid, rtype, prio, details)
-    request_queue.enqueue(req)
-    print(f"Enqueued: {req}")
 
 def view_queue_stats_menu():
     """
@@ -626,34 +538,103 @@ def view_queue_stats_menu():
     else:
         print("Invalid choice.")
 
-def process_request_menu():
+def add_request_action():
     """
-    3d. Dequeue next request, show details, update count, log to file.
+    Prompt for and enqueue a new StudentRequest, recording the action
+    on the undo stack for later undo/redo.
     """
-    if request_queue.is_empty():
-        print("No pending requests.")
+    # 1) Get and validate Student ID
+    sid_input = input("Student ID: ").strip()
+    try:
+        sid = int(sid_input)
+    except ValueError:
+        print(f"{Fore.RED}Invalid Student ID format. Must be an integer.{Style.RESET_ALL}")
         return
 
+    if not student_exists(sid):
+        print(f"{Fore.RED}Student ID {sid} not found in system. Cannot add request.{Style.RESET_ALL}")
+        return
+
+    # 2) Check for existing requests for this student
+    existing = [r for r in request_queue.list_all() if r.student_id == sid]
+    if existing:
+        confirm = input(
+            f"{Fore.YELLOW}Student {sid} already has {len(existing)} pending request(s). "
+            f"Add another? (YES/NO): {Style.RESET_ALL}"
+        ).strip().upper()
+
+        if confirm != "YES":
+            print(f"{Fore.CYAN}Request not added.{Style.RESET_ALL}")
+            return
+
+    # 3) Prompt for request details
+    rtype = input("Request Type: ").strip()
+    if not rtype:
+        print(f"{Fore.RED}Request Type cannot be empty.{Style.RESET_ALL}")
+        return
+
+    prio_input = input("Priority Level (integer, lower=more urgent): ").strip()
+    try:
+        prio = int(prio_input)
+    except ValueError:
+        print(f"{Fore.RED}Invalid priority; must be an integer.{Style.RESET_ALL}")
+        return
+
+    details = input("Request Details: ").strip()
+    if not details:
+        print(f"{Fore.RED}Request Details cannot be empty.{Style.RESET_ALL}")
+        return
+
+    # 4) Create, enqueue, and record undo
+    req = StudentRequest(sid, rtype, prio, details)
+    request_queue.enqueue(req)
+    undo_stack.append(("enqueue", req))
+    redo_stack.clear()
+
+    logging.info(f"Enqueued request: {req!r}")
+    print(f"{Fore.GREEN}Enqueued: {req}{Style.RESET_ALL}")
+
+
+
+def process_request_action():
+    """
+    Dequeue the highest-priority request, display and log it,
+    and record the action on the undo stack for later undo/redo.
+    """
+    if request_queue.is_empty():
+        print(f"{Fore.YELLOW}No pending requests.{Style.RESET_ALL}")
+        return
+
+    # 1) Dequeue
     req = request_queue.dequeue()
-    print("Processing next request:\n")
-    print(f"  Student ID     : {req.student_id}")
-    print(f"  Request Type   : {req.request_type}")
-    print(f"  Priority Level : {req.priority_level}")
-    print(f"  Details        : {req.request_details}")
-    print(f"  Timestamp      : {req.timestamp.isoformat()}\n")
 
+    # 2) Display details
+    print(f"\n{Fore.MAGENTA}{Style.BRIGHT}Processing Next Request{Style.RESET_ALL}\n")
+    print(f"{Fore.CYAN}Student ID     : {Fore.YELLOW}{req.student_id}")
+    print(f"{Fore.CYAN}Request Type   : {Fore.YELLOW}{req.request_type}")
+    print(f"{Fore.CYAN}Priority Level : {Fore.YELLOW}{req.priority_level}")
+    print(f"{Fore.CYAN}Details        : {Fore.YELLOW}{req.request_details}")
+    print(f"{Fore.CYAN}Timestamp      : {Fore.YELLOW}{req.timestamp.isoformat()}\n")
+
+    # 3) Show updated count
     remaining = request_queue.size()
-    print(f"Updated request count: {remaining}")
+    print(f"{Fore.CYAN}Updated requests remaining: {Fore.YELLOW}{remaining}\n")
 
-    # Log to processed_requests.log
+    # 4) Log to processed_requests.log
+    entry = {
+        "processed_at": datetime.now(timezone.utc).isoformat(),
+        **req.to_dict()
+    }
     with open('processed_requests.log', 'a') as f:
-        entry = {
-            "processed_at": datetime.now(timezone.utc).isoformat(),
-            **req.to_dict()
-        }
         f.write(json.dumps(entry) + "\n")
+    logging.info(f"Processed and logged request: {req!r}")
 
-    print("Request processed and logged.")
+    # 5) Record undo
+    undo_stack.append(("dequeue", req))
+    redo_stack.clear()
+
+    print(f"{Fore.GREEN}Request processed and logged.{Style.RESET_ALL}\n")
+
 
 def display_requests_table(requests):
     headers = ["Req ID", "Student ID", "Type", "Priority", "Timestamp"]
@@ -707,7 +688,7 @@ def generate_dummy_requests(n):
         "Fee Waiver": "Request waiver for late payment fee."
     }
     # if you want realistic student IDs, pick from your existing students:
-    existing_ids = list(student_registration_list.keys())
+    existing_ids = list(student_tree.keys())
     for _ in range(n):
         # pick a student ID (or make up a random one if list is empty)
         sid = random.choice(existing_ids) if existing_ids else random.randint(10000, 99999)
@@ -745,12 +726,12 @@ def dashboard_summary():
     print(f"\n{Fore.MAGENTA}{Style.BRIGHT}📊 Dashboard Summary{Style.RESET_ALL}\n")
 
     # 1. Total / FT / PT students
-    total_students = len(student_registration_list)
-    full_time      = sum(1 for s in student_registration_list.values() if s.is_full_time)
+    total_students = len(student_tree)
+    full_time      = sum(1 for s in student_tree.values() if s.is_full_time)
     part_time      = total_students - full_time
 
     # 2. Most common course
-    all_courses = [course for s in student_registration_list.values() for course in s.course_list]
+    all_courses = [course for s in student_tree.values() for course in s.course_list]
     course_counts = Counter(all_courses)
     if course_counts:
         common_course, common_count = course_counts.most_common(1)[0]
@@ -758,7 +739,7 @@ def dashboard_summary():
         common_course, common_count = ("N/A", 0)
 
     # 3. Average courses per student
-    avg_courses = (sum(len(s.course_list) for s in student_registration_list.values()) /
+    avg_courses = (sum(len(s.course_list) for s in student_tree.values()) /
                    total_students) if total_students else 0.0
 
     # 4. Pending requests
@@ -785,7 +766,6 @@ def dashboard_summary():
         print(f"  {Fore.YELLOW}None")
 
     print()  # trailing blank line
-
 
 def login():
     print("Login to the system")
@@ -827,17 +807,22 @@ def user(role):
             print("13. View Pending Student Requests")
             print("14. View Student Requests Queue Statistics")
             print("15. Process Next Student Request")
-            print("16. Dashboard Summary")
-            print("17. Logout")
-            print("18. Exit")
+            print("16. Undo Last Queue Action")
+            print("17. Redo Last Queue Action")
+            print("18. Dashboard Summary")
+            print("19. Logout")
+            print("20. Exit")
+            print("21. Show BST Structure")
+            print("22. Show Student Course History")
 
         elif role == "student":
-            print("1. Display All Students")
-            print("2. Search Student by ID or Name")
-            print("3. Logout")
-            print("4. Exit")
+            print(" 1. Display All Students")
+            print(" 2. Search Student by ID or Name")
+            print(" 3. View My Course History")
+            print(" 4. Logout")
+            print(" 5. Exit")
 
-        choice = input("Enter your choice: ")
+        choice = input("Enter your choice: ").strip()
 
         if role == "admin":
             if choice == '1':
@@ -863,21 +848,38 @@ def user(role):
             elif choice == '11':
                 import_from_excel()
             elif choice == '12':
-                add_request_menu()
+                add_request_action()
             elif choice == '13':
                 view_requests_menu()
             elif choice == '14':
                 view_queue_stats_menu()
             elif choice == '15':
-                process_request_menu()
+                process_request_action()
             elif choice == '16':
-                dashboard_summary()
+                undo_action()
             elif choice == '17':
+                redo_action()
+            elif choice == '18':
+                dashboard_summary()
+            elif choice == '19':
                 print("Logging out...")
                 return
-            elif choice == '18':
+            elif choice == '20':
                 print("Exiting program.")
                 exit()
+            elif choice == '21':
+                print("\n── Student BST Structure ──")
+                student_tree.print_tree()
+            elif choice == '22':
+                try:
+                    sid = int(input("Enter student ID to view course registration history: ").strip())
+                    student = student_tree.search(sid)
+                    if student:
+                        student.display_history()
+                    else:
+                        print("Student ID not found.")
+                except ValueError:
+                    print("Invalid ID format.")
             else:
                 print("Invalid choice.")
 
@@ -887,18 +889,31 @@ def user(role):
             elif choice == '2':
                 search_student()
             elif choice == '3':
+                try:
+                    sid = int(input("Enter student ID to view course registration history: ").strip())
+                    student = student_tree.search(sid)
+                    if student:
+                        student.display_history()
+                    else:
+                        print("Student ID not found.")
+                except ValueError:
+                    print("Invalid ID format.")
+            elif choice == '4':
                 print("Logging out...")
                 return
-            elif choice == '4':
+            elif choice == '5':
                 print("Exiting program.")
                 exit()
             else:
                 print("Invalid choice.")
 
+
 if __name__ == "__main__":
     try:
         load_data()
         generate_dummy_requests(50)
+        # print("\n⎯⎯ Current Student BST ⎯⎯")
+        # student_tree.print_tree()
         while True:
             role = login()
             if role:
