@@ -16,6 +16,13 @@ import os
 from dotenv import load_dotenv
 import requests
 import time
+import pandas as pd
+import matplotlib
+matplotlib.use("Agg")  # headless-safe
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+from datetime import datetime
+
 load_dotenv()
 
 init(autoreset=True)
@@ -865,6 +872,92 @@ def fix_encrypted_emails():
     else:
         print("✅ All emails already encrypted properly.")
 
+def load_student_df():
+    with open("student_data.pkl", "rb") as f:
+        bst = pickle.load(f)
+    rows = []
+    for s in bst.values():
+        rows.append({
+            "id": s.student_id,
+            "name": s.name,
+            "email": s.email,
+            "year": s.year_of_study,
+            "status": "Full-time" if s.is_full_time else "Part-time",
+            "courses": list(s.course_list)
+        })
+    return pd.DataFrame(rows)
+
+def load_requests_df():
+    with open("requests_data.json", "r") as f:
+        data = json.load(f)
+    return pd.DataFrame(data)
+
+# Generate charts + PDF
+def export_dashboard_charts_pdf(pdf_name=None):
+    df_stu = load_student_df()
+    df_req = load_requests_df()
+
+    total = len(df_stu)
+    ft = int((df_stu["status"] == "Full-time").sum()) if total else 0
+    pt = total - ft
+
+    top_course, top_count, vc_courses = "N/A", 0, pd.Series(dtype=int)
+    if total:
+        exploded = df_stu.explode("courses")
+        vc_courses = exploded["courses"].dropna().value_counts()
+        if not vc_courses.empty:
+            top_course, top_count = vc_courses.index[0], int(vc_courses.iloc[0])
+
+    pending = len(df_req)
+
+    out = pdf_name or f"dashboard_charts_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
+    with PdfPages(out) as pdf:
+        # Page 1: KPI board
+        fig1, ax1 = plt.subplots(figsize=(8.3, 5.8))
+        ax1.axis("off")
+        ax1.text(
+            0.05, 0.95,
+            (
+                "Dashboard Summary (Charts)\n\n"
+                f"Total students: {total}\n"
+                f"  • Full-time:  {ft}\n"
+                f"  • Part-time:  {pt}\n\n"
+                f"Most common course: {top_course} ({top_count})\n\n"
+                f"Pending requests: {pending}"
+            ),
+            va="top", ha="left", fontsize=14
+        )
+        pdf.savefig(fig1); plt.close(fig1)
+
+        # Page 2: FT vs PT bar
+        if total:
+            fig2, ax2 = plt.subplots(figsize=(8.3, 5.8))
+            df_stu["status"].value_counts().sort_index().plot(kind="bar", ax=ax2, rot=0, title="Full-time vs Part-time")
+            ax2.set_xlabel(""); ax2.set_ylabel("Count")
+            fig2.tight_layout(); pdf.savefig(fig2); plt.close(fig2)
+
+        # Page 3: Top 10 courses
+        if total and not vc_courses.empty:
+            fig3, ax3 = plt.subplots(figsize=(8.3, 5.8))
+            vc_courses.head(10).sort_values(ascending=True).plot(kind="barh", ax=ax3, title="Top 10 Courses by Enrollment")
+            ax3.set_xlabel("Students")
+            fig3.tight_layout(); pdf.savefig(fig3); plt.close(fig3)
+
+        # Page 4: Requests by Type
+        if pending:
+            fig4, ax4 = plt.subplots(figsize=(8.3, 5.8))
+            df_req["request_type"].value_counts().sort_values(ascending=True).plot(kind="barh", ax=ax4, title="Pending Requests by Type")
+            ax4.set_xlabel("Count")
+            fig4.tight_layout(); pdf.savefig(fig4); plt.close(fig4)
+
+        # Page 5: Requests by Priority
+        if pending:
+            fig5, ax5 = plt.subplots(figsize=(8.3, 5.8))
+            df_req["priority_level"].value_counts().sort_index().plot(kind="bar", ax=ax5, rot=0, title="Pending Requests by Priority")
+            ax5.set_xlabel("Priority"); ax5.set_ylabel("Count")
+            fig5.tight_layout(); pdf.savefig(fig5); plt.close(fig5)
+
+    print(f"✅ Exported dashboard charts to '{out}'")
 
 
 def user(role):
@@ -893,8 +986,9 @@ def user(role):
             print("19. Show BST Structure")
             print("20. Show Student Course History")
             print("21. AI Course Advisor")
-            print("22. Logout")
-            print("23. Exit")
+            print("22. Export Dashboard Charts (PDF)")
+            print("23. Logout")
+            print("24. Exit")
 
         elif role == "student":
             print(" 1. Display All Students")
@@ -959,13 +1053,16 @@ def user(role):
             elif choice == '21':
                 ai_course_advisory()
             elif choice == '22':
+                custom_pdf = input("PDF name (blank = timestamped): ").strip() or None
+                export_dashboard_charts_pdf(pdf_name=custom_pdf)
+
+            elif choice == '23':
                 print("Logging out...")
                 return
-            elif choice == '23':
+            elif choice == '24':
                 print("Exiting program.")
                 exit()
-            else:
-                print("Invalid choice.")
+
 
         elif role == "student":
             if choice == '1':
@@ -994,12 +1091,13 @@ def user(role):
                 print("Invalid choice.")
 
 
+
 if __name__ == "__main__":
     try:
         load_data()
         load_requests()  # ✅ Load requests
         student = student_tree.search(1001)
-        print(student._encrypted_email)
+        # print(student._encrypted_email)
         # if request_queue.is_empty():
         #     generate_dummy_requests(50)
         fix_encrypted_emails()  # optional
