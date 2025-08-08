@@ -221,3 +221,106 @@
 2025-08-06 19:54:21 - WARNING - Failed login attempt with username 'student'.
 2025-08-06 19:54:25 - INFO - Loaded StudentBST from storage.
 2025-08-06 19:54:28 - INFO - User 'admin' logged in successfully as admin.
+2025-08-07 09:50:18 - INFO - Loaded StudentBST from storage.
+2025-08-07 09:50:18 - INFO - Request queue saved.
+2025-08-07 09:50:24 - INFO - User 'student' logged in successfully as student.
+2025-08-07 09:51:38 - INFO - Loaded StudentBST from storage.
+2025-08-07 09:51:38 - INFO - Request queue loaded.
+2025-08-07 09:51:44 - INFO - User 'admin' logged in successfully as admin.
+2025-08-07 09:52:47 - INFO - Student 1015 - Ashley loo added.
+2025-08-07 09:52:47 - INFO - Student data saved to persistent storage.
+2025-08-07 09:53:58 - INFO - Student 1016 - You You added.
+2025-08-07 09:53:58 - INFO - Student data saved to persistent storage.
+2025-08-07 09:58:00 - INFO - Student 1008 - Power mon added.
+2025-08-07 09:58:00 - INFO - Student data saved to persistent storage.
+2025-08-07 09:58:44 - INFO - Student 1009 - Pika Chuu added.
+2025-08-07 09:58:44 - INFO - Student data saved to persistent storage.
+2025-08-07 09:59:54 - INFO - Student 1017 - Wun wun added.
+2025-08-07 09:59:54 - INFO - Student data saved to persistent storage.
+2025-08-07 10:00:25 - INFO - Student 1018 - ONE ONE added.
+2025-08-07 10:00:25 - INFO - Student data saved to persistent storage.
+2025-08-07 10:00:59 - INFO - Student 1019 - WOO WOOO added.
+2025-08-07 10:00:59 - INFO - Student data saved to persistent storage.
+2025-08-07 10:01:52 - INFO - Student 1020 - BRYAN HOO added.
+2025-08-07 10:01:52 - INFO - Student data saved to persistent storage.
+2025-08-07 10:22:45 - INFO - Loaded StudentBST from storage.
+2025-08-07 10:22:45 - INFO - Request queue loaded.
+2025-08-07 10:22:49 - INFO - User 'admin' logged in successfully as admin.
+2025-08-07 10:24:55 - INFO - Student 1021 - Chika wa added.
+2025-08-07 10:24:55 - INFO - Student data saved to persistent storage.
+2025-08-07 10:25:47 - INFO - Student 1022 - Gabriel Foo added.
+2025-08-07 10:25:47 - INFO - Student data saved to persistent storage.
+2025-08-07 10:26:39 - INFO - Student 1023 - Wang Wang added.
+2025-08-07 10:26:39 - INFO - Student data saved to persistent storage.
+2025-08-07 10:27:17 - INFO - Student 1024 - Wong Jing added.
+2025-08-07 10:27:17 - INFO - Student data saved to persistent storage.
+2025-08-07 10:28:24 - INFO - Student 1025 - Ali Tan added.
+2025-08-07 10:28:24 - INFO - Student data saved to persistent storage.
+2025-08-07 10:30:49 - INFO - Student 1026 - Kim Dokja added.
+2025-08-07 10:30:49 - INFO - Student data saved to persistent storage.
+2025-08-07 10:31:53 - INFO - Student 1027 - Bobby Teo added.
+2025-08-07 10:31:53 - INFO - Student data saved to persistent storage.
+2025-08-07 10:33:45 - INFO - Student 1028 - Chris Henderson added.
+2025-08-07 10:33:45 - INFO - Student data saved to persistent storage.
+2025-08-07 10:34:42 - INFO - Student 1029 - Mikhailo Mudryk added.
+2025-08-07 10:34:42 - INFO - Student data saved to persistent storage.
+2025-08-07 10:35:00 - INFO - Search performed for student: E
+2025-08-07 10:36:38 - INFO - Loaded StudentBST from storage.
+2025-08-07 10:36:38 - INFO - Request queue loaded.
+2025-08-07 10:36:52 - INFO - User 'admin' logged in successfully as admin.
+2025-08-07 10:38:50 - INFO - Processed and logged request: <Req req_id=28 stud_id=1011 type='Fee Waiver' prio=1 time=2025-07-31 13:24:58>
+2025-08-07 10:39:28 - INFO - Loaded StudentBST from storage.
+2025-08-07 10:39:28 - INFO - Request queue loaded.
+2025-08-07 10:39:32 - INFO - User 'admin' logged in successfully as admin.
+2025-08-07 10:40:36 - INFO - Processed and logged request: <Req req_id=28 stud_id=1011 type='Fee Waiver' prio=1 time=2025-07-31 13:24:58>
+2025-08-07 10:40:37 - INFO - Processed and logged request: <Req req_id=31 stud_id=1004 type='Grade Appeal' prio=1 time=2025-07-31 14:26:09>
+2025-08-07 10:40:46 - INFO - Loaded StudentBST from storage.
+2025-08-07 10:40:46 - INFO - Request queue loaded.
+2025-08-07 10:40:49 - WARNING - Failed login attempt with username 'admin'.
+2025-08-07 10:40:52 - INFO - User 'admin' logged in successfully as admin.
+2025-08-07 10:41:04 - INFO - Processed and logged request: <Req req_id=28 stud_id=1011 type='Fee Waiver' prio=1 time=2025-07-31 13:24:58>
+2025-08-07 10:41:30 - INFO - Loaded StudentBST from storage.
+2025-08-07 10:41:30 - INFO - Request queue loaded.
+2025-08-07 10:41:33 - INFO - User 'admin' logged in successfully as admin.
+2025-08-07 10:41:54 - INFO - Processed and logged request: <Req req_id=28 stud_id=1011 type='Fee Waiver' prio=1 time=2025-07-31 13:24:58>
+2025-08-07 10:41:57 - INFO - Processed and logged request: <Req req_id=31 stud_id=1004 type='Grade Appeal' prio=1 time=2025-07-31 14:26:09>
+2025-08-07 10:42:03 - INFO - Loaded StudentBST from storage.
+2025-08-07 10:42:03 - INFO - Request queue loaded.
+2025-08-07 10:42:06 - INFO - User 'admin' logged in successfully as admin.
+2025-08-07 10:42:09 - INFO - Processed and logged request: <Req req_id=28 stud_id=1011 type='Fee Waiver' prio=1 time=2025-07-31 13:24:58>
+2025-08-07 10:45:18 - INFO - Loaded StudentBST from storage.
+2025-08-07 10:45:18 - INFO - Request queue loaded.
+2025-08-07 10:45:21 - INFO - User 'admin' logged in successfully as admin.
+2025-08-07 10:45:22 - INFO - Request queue saved.
+2025-08-07 10:45:22 - INFO - Processed and logged request: <Req req_id=28 stud_id=1011 type='Fee Waiver' prio=1 time=2025-07-31 13:24:58>
+2025-08-07 10:45:24 - INFO - Request queue saved.
+2025-08-07 10:45:24 - INFO - Processed and logged request: <Req req_id=31 stud_id=1004 type='Grade Appeal' prio=1 time=2025-07-31 14:26:09>
+2025-08-07 10:45:31 - INFO - Loaded StudentBST from storage.
+2025-08-07 10:45:31 - INFO - Request queue loaded.
+2025-08-07 10:45:34 - INFO - User 'admin' logged in successfully as admin.
+2025-08-07 10:45:35 - INFO - Request queue saved.
+2025-08-07 10:45:35 - INFO - Processed and logged request: <Req req_id=5 stud_id=1010 type='Transcript Request' prio=1 time=2025-08-01 15:32:48>
+2025-08-07 10:45:44 - INFO - Loaded StudentBST from storage.
+2025-08-07 10:45:44 - INFO - Request queue loaded.
+2025-08-07 12:59:15 - INFO - Loaded StudentBST from storage.
+2025-08-07 12:59:15 - INFO - Request queue loaded.
+2025-08-07 12:59:19 - INFO - User 'admin' logged in successfully as admin.
+2025-08-07 13:05:48 - INFO - Student 1030 - gekko added.
+2025-08-07 13:05:48 - INFO - Student data saved to persistent storage.
+2025-08-07 13:31:00 - INFO - Course MM222 added to student 1030.
+2025-08-07 13:31:00 - INFO - Student data saved to persistent storage.
+2025-08-07 13:31:00 - INFO - Student 1030 enrolled in course MM222.
+2025-08-07 13:31:42 - INFO - Loaded StudentBST from storage.
+2025-08-07 13:31:42 - INFO - Request queue loaded.
+2025-08-07 13:31:47 - INFO - User 'admin' logged in successfully as admin.
+2025-08-07 13:35:48 - INFO - Request queue saved.
+2025-08-07 13:35:48 - INFO - Processed and logged request: <Req req_id=10 stud_id=1011 type='Grade Appeal' prio=1 time=2025-08-02 01:40:18>
+2025-08-07 13:38:09 - INFO - Request queue saved.
+2025-08-07 13:38:09 - INFO - Processed and logged request: <Req req_id=1 stud_id=1012 type='Password Reset' prio=1 time=2025-08-02 17:29:48>
+2025-08-07 13:41:26 - INFO - Request queue saved.
+2025-08-07 13:41:26 - INFO - Processed and logged request: <Req req_id=19 stud_id=1011 type='Profile Update' prio=1 time=2025-08-02 21:12:59>
+2025-08-07 13:41:31 - INFO - Request queue saved.
+2025-08-07 13:41:41 - INFO - Request queue saved.
+2025-08-07 13:43:03 - INFO - Loaded StudentBST from storage.
+2025-08-07 13:43:03 - INFO - Request queue loaded.
+2025-08-07 13:43:06 - INFO - User 'admin' logged in successfully as admin.

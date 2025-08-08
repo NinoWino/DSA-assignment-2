@@ -1,0 +1,354 @@
+[
+  {
+    "student_id": 1012,
+    "request_type": "Password Reset",
+    "priority_level": 1,
+    "request_details": "Forgot password, needs reset link.",
+    "timestamp": "2025-08-03T17:09:13.119763+00:00",
+    "request_id": 24
+  },
+  {
+    "student_id": 1002,
+    "request_type": "Transcript Request",
+    "priority_level": 1,
+    "request_details": "Official transcript for internship.",
+    "timestamp": "2025-08-04T02:03:16.119763+00:00",
+    "request_id": 8
+  },
+  {
+    "student_id": 1002,
+    "request_type": "Course Enrollment",
+    "priority_level": 1,
+    "request_details": "Add CS101 to my schedule.",
+    "timestamp": "2025-08-06T02:10:37.119763+00:00",
+    "request_id": 15
+  },
+  {
+    "student_id": 1005,
+    "request_type": "Course Enrollment",
+    "priority_level": 1,
+    "request_details": "Add CS101 to my schedule.",
+    "timestamp": "2025-08-06T19:54:34.119763+00:00",
+    "request_id": 36
+  },
+  {
+    "student_id": 1003,
+    "request_type": "Transcript Request",
+    "priority_level": 2,
+    "request_details": "Official transcript for internship.",
+    "timestamp": "2025-08-01T15:11:20.120749+00:00",
+    "request_id": 47
+  },
+  {
+    "student_id": 1011,
+    "request_type": "Fee Waiver",
+    "priority_level": 2,
+    "request_details": "Request waiver for late payment fee.",
+    "timestamp": "2025-08-01T22:50:04.119763+00:00",
+    "request_id": 7
+  },
+  {
+    "student_id": 1002,
+    "request_type": "Course Enrollment",
+    "priority_level": 2,
+    "request_details": "Add CS101 to my schedule.",
+    "timestamp": "2025-08-02T18:12:20.120749+00:00",
+    "request_id": 38
+  },
+  {
+    "student_id": 1005,
+    "request_type": "Profile Update",
+    "priority_level": 2,
+    "request_details": "Change of address and phone number.",
+    "timestamp": "2025-08-03T14:16:47.119763+00:00",
+    "request_id": 17
+  },
+  {
+    "student_id": 1012,
+    "request_type": "Fee Waiver",
+    "priority_level": 2,
+    "request_details": "Request waiver for late payment fee.",
+    "timestamp": "2025-08-04T17:22:19.119763+00:00",
+    "request_id": 21
+  },
+  {
+    "student_id": 1007,
+    "request_type": "Transcript Request",
+    "priority_level": 2,
+    "request_details": "Official transcript for internship.",
+    "timestamp": "2025-08-05T22:35:03.119763+00:00",
+    "request_id": 9
+  },
+  {
+    "student_id": 1006,
+    "request_type": "Profile Update",
+    "priority_level": 2,
+    "request_details": "Change of address and phone number.",
+    "timestamp": "2025-08-06T06:59:38.119763+00:00",
+    "request_id": 26
+  },
+  {
+    "student_id": 1014,
+    "request_type": "Profile Update",
+    "priority_level": 2,
+    "request_details": "Change of address and phone number.",
+    "timestamp": "2025-08-06T08:28:42.120749+00:00",
+    "request_id": 46
+  },
+  {
+    "student_id": 1004,
+    "request_type": "Course Enrollment",
+    "priority_level": 2,
+    "request_details": "Add CS101 to my schedule.",
+    "timestamp": "2025-08-06T18:23:32.119763+00:00",
+    "request_id": 22
+  },
+  {
+    "student_id": 1004,
+    "request_type": "Profile Update",
+    "priority_level": 3,
+    "request_details": "Change of address and phone number.",
+    "timestamp": "2025-07-31T13:59:50.119763+00:00",
+    "request_id": 4
+  },
+  {
+    "student_id": 1010,
+    "request_type": "Profile Update",
+    "priority_level": 3,
+    "request_details": "Change of address and phone number.",
+    "timestamp": "2025-07-31T16:20:37.119763+00:00",
+    "request_id": 12
+  },
+  {
+    "student_id": 1001,
+    "request_type": "Grade Appeal",
+    "priority_level": 3,
+    "request_details": "Review grade for assignment 3.",
+    "timestamp": "2025-08-01T05:46:19.119763+00:00",
+    "request_id": 35
+  },
+  {
+    "student_id": 1012,
+    "request_type": "Password Reset",
+    "priority_level": 3,
+    "request_details": "Forgot password, needs reset link.",
+    "timestamp": "2025-08-01T21:34:44.119763+00:00",
+    "request_id": 3
+  },
+  {
+    "student_id": 1003,
+    "request_type": "Transcript Request",
+    "priority_level": 3,
+    "request_details": "Official transcript for internship.",
+    "timestamp": "2025-08-02T04:34:48.119763+00:00",
+    "request_id": 16
+  },
+  {
+    "student_id": 1002,
+    "request_type": "Course Enrollment",
+    "priority_level": 3,
+    "request_details": "Add CS101 to my schedule.",
+    "timestamp": "2025-08-04T19:20:19.120749+00:00",
+    "request_id": 48
+  },
+  {
+    "student_id": 1006,
+    "request_type": "Grade Appeal",
+    "priority_level": 4,
+    "request_details": "Review grade for assignment 3.",
+    "timestamp": "2025-07-31T22:12:56.119763+00:00",
+    "request_id": 23
+  },
+  {
+    "student_id": 1007,
+    "request_type": "Profile Update",
+    "priority_level": 4,
+    "request_details": "Change of address and phone number.",
+    "timestamp": "2025-08-01T07:57:01.120749+00:00",
+    "request_id": 40
+  },
+  {
+    "student_id": 1012,
+    "request_type": "Grade Appeal",
+    "priority_level": 4,
+    "request_details": "Review grade for assignment 3.",
+    "timestamp": "2025-08-01T14:19:45.120749+00:00",
+    "request_id": 49
+  },
+  {
+    "student_id": 1003,
+    "request_type": "Password Reset",
+    "priority_level": 4,
+    "request_details": "Forgot password, needs reset link.",
+    "timestamp": "2025-08-02T14:54:05.119763+00:00",
+    "request_id": 25
+  },
+  {
+    "student_id": 1001,
+    "request_type": "Course Enrollment",
+    "priority_level": 4,
+    "request_details": "Add CS101 to my schedule.",
+    "timestamp": "2025-08-02T22:27:35.120749+00:00",
+    "request_id": 39
+  },
+  {
+    "student_id": 1013,
+    "request_type": "Transcript Request",
+    "priority_level": 4,
+    "request_details": "Official transcript for internship.",
+    "timestamp": "2025-08-03T00:46:36.120749+00:00",
+    "request_id": 45
+  },
+  {
+    "student_id": 1001,
+    "request_type": "Grade Appeal",
+    "priority_level": 4,
+    "request_details": "Review grade for assignment 3.",
+    "timestamp": "2025-08-04T00:36:39.119763+00:00",
+    "request_id": 13
+  },
+  {
+    "student_id": 1001,
+    "request_type": "Password Reset",
+    "priority_level": 4,
+    "request_details": "Forgot password, needs reset link.",
+    "timestamp": "2025-08-04T11:05:45.119763+00:00",
+    "request_id": 14
+  },
+  {
+    "student_id": 1007,
+    "request_type": "Course Enrollment",
+    "priority_level": 4,
+    "request_details": "Add CS101 to my schedule.",
+    "timestamp": "2025-08-05T05:53:51.119763+00:00",
+    "request_id": 34
+  },
+  {
+    "student_id": 1007,
+    "request_type": "Fee Waiver",
+    "priority_level": 4,
+    "request_details": "Request waiver for late payment fee.",
+    "timestamp": "2025-08-06T15:33:01.119763+00:00",
+    "request_id": 32
+  },
+  {
+    "student_id": 1013,
+    "request_type": "Transcript Request",
+    "priority_level": 5,
+    "request_details": "Official transcript for internship.",
+    "timestamp": "2025-07-31T13:45:54.119763+00:00",
+    "request_id": 11
+  },
+  {
+    "student_id": 1004,
+    "request_type": "Transcript Request",
+    "priority_level": 5,
+    "request_details": "Official transcript for internship.",
+    "timestamp": "2025-07-31T18:59:10.119763+00:00",
+    "request_id": 27
+  },
+  {
+    "student_id": 1007,
+    "request_type": "Password Reset",
+    "priority_level": 5,
+    "request_details": "Forgot password, needs reset link.",
+    "timestamp": "2025-08-01T03:20:15.120749+00:00",
+    "request_id": 41
+  },
+  {
+    "student_id": 1013,
+    "request_type": "Profile Update",
+    "priority_level": 5,
+    "request_details": "Change of address and phone number.",
+    "timestamp": "2025-08-01T11:12:43.120749+00:00",
+    "request_id": 50
+  },
+  {
+    "student_id": 1014,
+    "request_type": "Profile Update",
+    "priority_level": 5,
+    "request_details": "Change of address and phone number.",
+    "timestamp": "2025-08-01T19:04:21.119763+00:00",
+    "request_id": 6
+  },
+  {
+    "student_id": 1014,
+    "request_type": "Course Enrollment",
+    "priority_level": 5,
+    "request_details": "Add CS101 to my schedule.",
+    "timestamp": "2025-08-02T19:30:45.119763+00:00",
+    "request_id": 30
+  },
+  {
+    "student_id": 1004,
+    "request_type": "Fee Waiver",
+    "priority_level": 5,
+    "request_details": "Request waiver for late payment fee.",
+    "timestamp": "2025-08-02T22:28:20.120749+00:00",
+    "request_id": 42
+  },
+  {
+    "student_id": 1010,
+    "request_type": "Password Reset",
+    "priority_level": 5,
+    "request_details": "Forgot password, needs reset link.",
+    "timestamp": "2025-08-03T05:11:29.119763+00:00",
+    "request_id": 33
+  },
+  {
+    "student_id": 1005,
+    "request_type": "Profile Update",
+    "priority_level": 5,
+    "request_details": "Change of address and phone number.",
+    "timestamp": "2025-08-04T09:16:11.120749+00:00",
+    "request_id": 43
+  },
+  {
+    "student_id": 1011,
+    "request_type": "Fee Waiver",
+    "priority_level": 5,
+    "request_details": "Request waiver for late payment fee.",
+    "timestamp": "2025-08-04T11:48:05.119763+00:00",
+    "request_id": 2
+  },
+  {
+    "student_id": 1004,
+    "request_type": "Course Enrollment",
+    "priority_level": 5,
+    "request_details": "Add CS101 to my schedule.",
+    "timestamp": "2025-08-05T06:05:44.119763+00:00",
+    "request_id": 20
+  },
+  {
+    "student_id": 1005,
+    "request_type": "Transcript Request",
+    "priority_level": 5,
+    "request_details": "Official transcript for internship.",
+    "timestamp": "2025-08-05T23:24:29.119763+00:00",
+    "request_id": 29
+  },
+  {
+    "student_id": 1014,
+    "request_type": "Fee Waiver",
+    "priority_level": 5,
+    "request_details": "Request waiver for late payment fee.",
+    "timestamp": "2025-08-06T00:01:34.120749+00:00",
+    "request_id": 44
+  },
+  {
+    "student_id": 1007,
+    "request_type": "Transcript Request",
+    "priority_level": 5,
+    "request_details": "Official transcript for internship.",
+    "timestamp": "2025-08-06T01:21:33.119763+00:00",
+    "request_id": 18
+  },
+  {
+    "student_id": 1004,
+    "request_type": "Fee Waiver",
+    "priority_level": 5,
+    "request_details": "Request waiver for late payment fee.",
+    "timestamp": "2025-08-06T19:03:48.119763+00:00",
+    "request_id": 37
+  }
+]

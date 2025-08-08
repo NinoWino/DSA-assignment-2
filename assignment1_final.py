@@ -630,6 +630,7 @@ def process_request_action():
 
     # 1) Dequeue
     req = request_queue.dequeue()
+    save_requests()
 
     # 2) Display details
     print(f"\n{Fore.MAGENTA}{Style.BRIGHT}Processing Next Request{Style.RESET_ALL}\n")
@@ -997,10 +998,10 @@ if __name__ == "__main__":
     try:
         load_data()
         load_requests()  # ✅ Load requests
-        # student = student_tree.search(1001)
-        # print(student._encrypted_email)
-        if request_queue.is_empty():
-            generate_dummy_requests(50)
+        student = student_tree.search(1001)
+        print(student._encrypted_email)
+        # if request_queue.is_empty():
+        #     generate_dummy_requests(50)
         fix_encrypted_emails()  # optional
         while True:
             role = login()
