@@ -28,9 +28,6 @@ def decrypt_field(ciphertext: str) -> str:
     return ''.join(plain_chars)
 
 class CourseHistoryNode:
-    """
-    A node in the linked list tracking a single course add/remove event.
-    """
     def __init__(self, course_code: str, action: str, timestamp: datetime = None):
         self.course_code = course_code
         self.action = action  # 'add' or 'remove'
