@@ -795,7 +795,7 @@ def dashboard_summary():
     print()  # trailing blank line
 
 def login():
-    # Example hardcoded users (replace with your DB lookups if needed)
+    # Example hardcoded users (replace with DB if needed)
     users = {
         "admin": {
             "password": hashlib.sha256("admin123".encode()).hexdigest(),
@@ -811,40 +811,80 @@ def login():
         print("\n── Login Menu ──")
         print("1) Username + Password")
         print("2) Face Login (LBPH)")
-        print("3) Enroll Face")
-        print("4) Back to Main Menu")
         choice = input("Select option: ").strip()
 
+        # -------------------------
+        # Option 1 — Username + Password
+        # -------------------------
         if choice == "1":
             username = input("Enter username: ").strip()
             password = input("Enter password: ").strip()
             hashed_input = hashlib.sha256(password.encode()).hexdigest()
 
             if username in users and users[username]["password"] == hashed_input:
-                logging.info(f"User '{username}' logged in successfully as {users[username]['role']}.")
                 print(f"✅ Welcome, {username} ({users[username]['role']})")
+
+                # Check if user already has face data
+                user_dir = os.path.join(face_auth.face_dir, username)
+                if not os.path.exists(user_dir) or not os.listdir(user_dir):
+                    setup = input("No face enrolled. Enroll now? (y/n): ").strip().lower()
+                    if setup == "y":
+                        choice2 = input("Use webcam? (y/n): ").strip().lower()
+                        if choice2 == "y":
+                            img_path = capture_webcam_image(temp_name=f"{username}_enroll.jpg")
+                            if img_path:
+                                face_auth.enroll(username, img_path)
+                                face_auth.train_model()
+                        else:
+                            img_path = input("Path to face image: ").strip()
+                            face_auth.enroll(username, img_path)
+                            face_auth.train_model()
+                else:
+                    verify = input("Verify via face recognition for extra security? (y/n): ").strip().lower()
+                    if verify == "y":
+                        choice2 = input("Use webcam? (y/n): ").strip().lower()
+                        if choice2 == "y":
+                            img_path = capture_webcam_image(temp_name="login_face.jpg")
+                        else:
+                            img_path = input("Path to login face image: ").strip()
+                        if img_path:
+                            ok, msg = face_auth.verify(img_path)
+                            print(("✅ " if ok else "❌ ") + msg)
+                            if not ok:
+                                print("Face verification failed. Continuing with password login only.")
+
                 return users[username]["role"]
+
             else:
-                logging.warning(f"Failed login attempt with username '{username}'.")
                 print("❌ Invalid username or password.")
 
+        # -------------------------
+        # Option 2 — Face Login (Only if enrolled)
+        # -------------------------
         elif choice == "2":
-            role = face_login_cli(users)
-            if role:
-                print(f"✅ Logged in via Face Recognition as {role}")
-                return role
+            username = input("Enter username for face login: ").strip()
+            user_dir = os.path.join(face_auth.face_dir, username)
+            if not os.path.exists(user_dir) or not os.listdir(user_dir):
+                print("❌ No face data enrolled for this account. Please login with username + password first.")
+                continue
+
+            choice2 = input("Use webcam? (y/n): ").strip().lower()
+            if choice2 == "y":
+                img_path = capture_webcam_image(temp_name="login_face.jpg")
             else:
-                print("❌ Face login failed or unauthorized.")
+                img_path = input("Path to login face image: ").strip()
 
-        elif choice == "3":
-            enroll_face_cli()
-
-        elif choice == "4":
-            print("Returning to main menu...")
-            return None
+            if img_path:
+                ok, msg = face_auth.verify(img_path)
+                print(("✅ " if ok else "❌ ") + msg)
+                if ok and username in users:
+                    return users[username]["role"]
+                else:
+                    print("❌ Face login failed or unauthorized.")
 
         else:
             print("Invalid choice. Try again.")
+
 
 
 def ai_course_advisory():
@@ -1008,29 +1048,71 @@ def export_dashboard_charts_pdf(pdf_name=None):
 
     print(f"✅ Exported dashboard charts to '{out}'")
 
+def capture_webcam_image(temp_name="temp_face.jpg"):
+    """Capture a single image from the webcam and save to a temp file."""
+    cam = cv2.VideoCapture(0)  # 0 = default camera
+    if not cam.isOpened():
+        print("❌ Could not open webcam.")
+        return None
+
+    print("📷 Press SPACE to capture, ESC to cancel.")
+    while True:
+        ret, frame = cam.read()
+        if not ret:
+            print("❌ Failed to grab frame.")
+            break
+        cv2.imshow("Webcam Capture", frame)
+        key = cv2.waitKey(1)
+
+        if key % 256 == 27:  # ESC pressed
+            print("❌ Capture cancelled.")
+            cam.release()
+            cv2.destroyAllWindows()
+            return None
+        elif key % 256 == 32:  # SPACE pressed
+            filename = os.path.join(os.getcwd(), temp_name)
+            cv2.imwrite(filename, frame)
+            print(f"✅ Image saved to {filename}")
+            cam.release()
+            cv2.destroyAllWindows()
+            return filename
+
 def enroll_face_cli():
     username = input("Username to enroll: ").strip()
-    img_path = input("Path to face image: ").strip()
+    choice = input("Use webcam? (y/n): ").strip().lower()
+    if choice == "y":
+        img_path = capture_webcam_image(temp_name=f"{username}_enroll.jpg")
+        if not img_path:
+            return
+    else:
+        img_path = input("Path to face image: ").strip()
+
     try:
         face_auth.enroll(username, img_path)
+        face_auth.train_model()  # auto-train after enrollment
     except Exception as e:
         print(f"❌ {e}")
 
-def train_faces_cli():
-    try:
-        face_auth.train_model()
-    except Exception as e:
-        print(f"❌ {e}")
+def face_login_cli(users):
+    choice = input("Use webcam? (y/n): ").strip().lower()
+    if choice == "y":
+        img_path = capture_webcam_image(temp_name="login_face.jpg")
+        if not img_path:
+            return None
+    else:
+        img_path = input("Path to login face image: ").strip()
 
-def face_login_cli():
-    img_path = input("Path to login face image: ").strip()
     try:
         ok, msg = face_auth.verify(img_path)
         print(("✅ " if ok else "❌ ") + msg)
-        return ok
+        if ok:
+            matched_user = msg.split(":")[1].split("(")[0].strip()
+            if matched_user in users:
+                return users[matched_user]["role"]
+        return None
     except Exception as e:
         print(f"❌ {e}")
-        return False
+        return None
 
 
 def user(role):
