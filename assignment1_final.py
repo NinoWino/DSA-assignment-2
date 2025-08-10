@@ -910,6 +910,9 @@ def export_dashboard_charts_pdf(pdf_name=None):
 
     pending = len(df_req)
 
+    if pdf_name and not pdf_name.lower().endswith(".pdf"):
+        pdf_name += ".pdf"
+
     out = pdf_name or f"dashboard_charts_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
     with PdfPages(out) as pdf:
         # Page 1: KPI board
@@ -932,9 +935,19 @@ def export_dashboard_charts_pdf(pdf_name=None):
         # Page 2: FT vs PT bar
         if total:
             fig2, ax2 = plt.subplots(figsize=(8.3, 5.8))
-            df_stu["status"].value_counts().sort_index().plot(kind="bar", ax=ax2, rot=0, title="Full-time vs Part-time")
-            ax2.set_xlabel(""); ax2.set_ylabel("Count")
-            fig2.tight_layout(); pdf.savefig(fig2); plt.close(fig2)
+            labels = ["Full-time", "Part-time"]
+            sizes = [ft, pt]
+            ax2.pie(
+                sizes,
+                labels=labels,
+                autopct="%1.0f%%",
+                startangle=90
+            )
+            ax2.set_title("Full-time vs Part-time")
+            ax2.axis("equal")  # keep it circular
+            fig2.tight_layout()
+            pdf.savefig(fig2)
+            plt.close(fig2)
 
         # Page 3: Top 10 courses
         if total and not vc_courses.empty:
