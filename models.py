@@ -6,6 +6,11 @@ import json
 from datetime import datetime, timezone
 import base64
 from colorama import Fore, Style, init
+import os
+import cv2
+import json
+import numpy as np
+from datetime import datetime
 
 # counter for unique request IDs
 _request_id_counter = itertools.count(1)
@@ -353,4 +358,96 @@ class StudentBST:
                             prefix + ("    " if is_left else "│   "),
                             is_left=True)
 
+class FaceAuth:
+    """
+    Face enrollment and verification using OpenCV LBPHFaceRecognizer.
+    Stores cropped face images per user.
+    Requires: pip install opencv-contrib-python
+    """
+    def __init__(self, face_dir="faces", model_path="face_lbph_model.yml"):
+        self.face_dir = face_dir
+        self.model_path = model_path
+        os.makedirs(self.face_dir, exist_ok=True)
+        self.detector = cv2.CascadeClassifier(
+            cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
+        )
+        self.recognizer = cv2.face.LBPHFaceRecognizer_create()
 
+    def enroll(self, username: str, image_path: str):
+        """Enroll a face image for a username."""
+        img = cv2.imread(image_path)
+        if img is None:
+            raise RuntimeError("Image not found or cannot be read.")
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        faces = self.detector.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
+        if len(faces) == 0:
+            raise RuntimeError("No face detected in the image.")
+
+        user_dir = os.path.join(self.face_dir, username)
+        os.makedirs(user_dir, exist_ok=True)
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        for (x, y, w, h) in faces:
+            face_crop = gray[y:y+h, x:x+w]
+            face_crop = cv2.resize(face_crop, (200, 200))
+            cv2.imwrite(os.path.join(user_dir, f"{ts}.png"), face_crop)
+        print(f"✅ Face enrolled for '{username}'.")
+
+    def train_model(self):
+        """Train LBPH model on all enrolled faces."""
+        faces, labels = [], []
+        label_map = {}
+        current_label = 0
+
+        for username in os.listdir(self.face_dir):
+            user_dir = os.path.join(self.face_dir, username)
+            if not os.path.isdir(user_dir):
+                continue
+            label_map[current_label] = username
+            for img_file in os.listdir(user_dir):
+                path = os.path.join(user_dir, img_file)
+                img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+                if img is None:
+                    continue
+                faces.append(img)
+                labels.append(current_label)
+            current_label += 1
+
+        if not faces:
+            raise RuntimeError("No faces found for training.")
+
+        self.recognizer.train(faces, np.array(labels))
+        self.recognizer.write(self.model_path)
+
+        # Save label map
+        with open(self.model_path + ".labels.json", "w") as f:
+            json.dump(label_map, f)
+        print("✅ Model trained and saved.")
+
+    def verify(self, image_path: str, threshold: float = 65.0):
+        """Verify an image against trained model."""
+        if not os.path.exists(self.model_path):
+            raise RuntimeError("Model not trained yet. Call train_model() first.")
+
+        # Load model + labels
+        self.recognizer.read(self.model_path)
+        with open(self.model_path + ".labels.json", "r") as f:
+            label_map = json.load(f)
+
+        img = cv2.imread(image_path)
+        if img is None:
+            raise RuntimeError("Image not found or cannot be read.")
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        faces = self.detector.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5)
+        if len(faces) == 0:
+            return False, "No face detected."
+
+        for (x, y, w, h) in faces:
+            face_crop = cv2.resize(gray[y:y+h, x:x+w], (200, 200))
+            label_id, confidence = self.recognizer.predict(face_crop)
+            username = label_map[str(label_id)] if isinstance(label_map, dict) else label_map[label_id]
+            if confidence <= threshold:
+                return True, f"Match: {username} (confidence={confidence:.1f})"
+            else:
+                return False, f"Face mismatch (confidence={confidence:.1f})"
+
+        return False, "No match found."

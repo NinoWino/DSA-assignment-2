@@ -22,6 +22,9 @@ matplotlib.use("Agg")  # headless-safe
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from datetime import datetime
+from models import FaceAuth
+
+face_auth = FaceAuth()
 
 load_dotenv()
 
@@ -792,24 +795,57 @@ def dashboard_summary():
     print()  # trailing blank line
 
 def login():
-    print("Login to the system")
-    username = input("Enter username: ").strip()
-    password = input("Enter password: ").strip()
-
+    # Example hardcoded users (replace with your DB lookups if needed)
     users = {
-        "admin": {"password": hashlib.sha256("admin123".encode()).hexdigest(), "role": "admin"},
-        "student": {"password": hashlib.sha256("student123".encode()).hexdigest(), "role": "student"}
+        "admin": {
+            "password": hashlib.sha256("admin123".encode()).hexdigest(),
+            "role": "admin"
+        },
+        "student": {
+            "password": hashlib.sha256("student123".encode()).hexdigest(),
+            "role": "student"
+        }
     }
 
-    hashed_input = hashlib.sha256(password.encode()).hexdigest()
-    if username in users and users[username]["password"] == hashed_input:
-        logging.info(f"User '{username}' logged in successfully as {users[username]['role']}.")
-        print(f"Welcome, {username} ({users[username]['role']})")
-        return users[username]["role"]
-    else:
-        logging.warning(f"Failed login attempt with username '{username}'.")
-        print("Invalid username or password.")
-        return None
+    while True:
+        print("\n── Login Menu ──")
+        print("1) Username + Password")
+        print("2) Face Login (LBPH)")
+        print("3) Enroll Face")
+        print("4) Back to Main Menu")
+        choice = input("Select option: ").strip()
+
+        if choice == "1":
+            username = input("Enter username: ").strip()
+            password = input("Enter password: ").strip()
+            hashed_input = hashlib.sha256(password.encode()).hexdigest()
+
+            if username in users and users[username]["password"] == hashed_input:
+                logging.info(f"User '{username}' logged in successfully as {users[username]['role']}.")
+                print(f"✅ Welcome, {username} ({users[username]['role']})")
+                return users[username]["role"]
+            else:
+                logging.warning(f"Failed login attempt with username '{username}'.")
+                print("❌ Invalid username or password.")
+
+        elif choice == "2":
+            role = face_login_cli(users)
+            if role:
+                print(f"✅ Logged in via Face Recognition as {role}")
+                return role
+            else:
+                print("❌ Face login failed or unauthorized.")
+
+        elif choice == "3":
+            enroll_face_cli()
+
+        elif choice == "4":
+            print("Returning to main menu...")
+            return None
+
+        else:
+            print("Invalid choice. Try again.")
+
 
 def ai_course_advisory():
     print("\n🤖 AI Course Advisor (OpenRouter) — type 'exit' to return.\n")
@@ -972,6 +1008,30 @@ def export_dashboard_charts_pdf(pdf_name=None):
 
     print(f"✅ Exported dashboard charts to '{out}'")
 
+def enroll_face_cli():
+    username = input("Username to enroll: ").strip()
+    img_path = input("Path to face image: ").strip()
+    try:
+        face_auth.enroll(username, img_path)
+    except Exception as e:
+        print(f"❌ {e}")
+
+def train_faces_cli():
+    try:
+        face_auth.train_model()
+    except Exception as e:
+        print(f"❌ {e}")
+
+def face_login_cli():
+    img_path = input("Path to login face image: ").strip()
+    try:
+        ok, msg = face_auth.verify(img_path)
+        print(("✅ " if ok else "❌ ") + msg)
+        return ok
+    except Exception as e:
+        print(f"❌ {e}")
+        return False
+
 
 def user(role):
     while True:
@@ -1000,16 +1060,18 @@ def user(role):
             print("20. Show Student Course History")
             print("21. AI Course Advisor")
             print("22. Export Dashboard Charts (PDF)")
-            print("23. Logout")
-            print("24. Exit")
+            print("23. Enroll Face")        # <--- New feature here
+            print("24. Train Face Model")   # <--- New feature here
+            print("25. Logout")             # Always second last
+            print("26. Exit")               # Always last
 
         elif role == "student":
             print(" 1. Display All Students")
             print(" 2. Search Student by ID or Name")
             print(" 3. View My Course History")
             print(" 4. AI Course Advisor")
-            print(" 5. Logout")
-            print(" 6. Exit")
+            print(" 5. Logout")  # Always second last
+            print(" 6. Exit")    # Always last
 
         choice = input("Enter your choice: ").strip()
 
@@ -1068,14 +1130,18 @@ def user(role):
             elif choice == '22':
                 custom_pdf = input("PDF name (blank = timestamped): ").strip() or None
                 export_dashboard_charts_pdf(pdf_name=custom_pdf)
-
             elif choice == '23':
+                enroll_face_cli()
+            elif choice == '24':
+                train_faces_cli()
+            elif choice == '25':
                 print("Logging out...")
                 return
-            elif choice == '24':
+            elif choice == '26':
                 print("Exiting program.")
                 exit()
-
+            else:
+                print("Invalid choice.")
 
         elif role == "student":
             if choice == '1':
@@ -1102,6 +1168,7 @@ def user(role):
                 exit()
             else:
                 print("Invalid choice.")
+
 
 
 
