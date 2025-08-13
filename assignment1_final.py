@@ -1117,6 +1117,80 @@ def face_login_cli(users):
         print(f"❌ {e}")
         return None
 
+def email_dashboard_charts(
+    recipient_email: str,
+    pdf_name: str | None = None,
+    subject: str | None = None,
+    body: str | None = None,
+):
+    """
+    Generate the dashboard PDF and email it as an attachment.
+
+    Env vars used (via .env):
+      - EMAIL_USER: sender email
+      - EMAIL_PASS: sender password / app password
+      - SMTP_SERVER: SMTP host (default: smtp.gmail.com)
+      - SMTP_PORT: SMTP port (default: 587)
+    """
+    import os
+    import smtplib
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.base import MIMEBase
+    from email.mime.text import MIMEText
+    from email import encoders
+    from datetime import datetime
+
+    # 1) Generate a filename if not provided, then build the PDF with your existing function
+    if not pdf_name:
+        pdf_name = f"dashboard_charts_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.pdf"
+    if not pdf_name.lower().endswith(".pdf"):
+        pdf_name += ".pdf"
+
+    export_dashboard_charts_pdf(pdf_name=pdf_name)
+    pdf_path = pdf_name
+
+    # 2) Gather SMTP config
+    sender_email = os.getenv("EMAIL_USER")
+    sender_password = os.getenv("EMAIL_PASS")
+    smtp_server = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+    smtp_port = int(os.getenv("SMTP_PORT", "587"))
+
+    if not sender_email or not sender_password:
+        print("❌ Missing EMAIL_USER or EMAIL_PASS in environment (.env).")
+        return
+
+    # 3) Compose the email
+    msg = MIMEMultipart()
+    msg["From"] = sender_email
+    msg["To"] = recipient_email
+    msg["Subject"] = subject or "Student System Dashboard Charts"
+
+    body = body or "Hi,\n\nAttached is the latest dashboard analytics (PDF).\n\nRegards,\nStudent System"
+    msg.attach(MIMEText(body, "plain"))
+
+    # 4) Attach the PDF
+    try:
+        with open(pdf_path, "rb") as f:
+            part = MIMEBase("application", "octet-stream")
+            part.set_payload(f.read())
+        encoders.encode_base64(part)
+        part.add_header("Content-Disposition", f'attachment; filename="{os.path.basename(pdf_path)}"')
+        msg.attach(part)
+    except FileNotFoundError:
+        print(f"❌ PDF not found at '{pdf_path}'.")
+        return
+
+    # 5) Send
+    try:
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.send_message(msg)
+        server.quit()
+        print(f"✅ Dashboard PDF emailed to {recipient_email} (file: {pdf_path})")
+    except Exception as e:
+        print(f"❌ Email sending failed: {e}")
+
 
 def user(role):
     while True:
@@ -1145,18 +1219,18 @@ def user(role):
             print("20. Show Student Course History")
             print("21. AI Course Advisor")
             print("22. Export Dashboard Charts (PDF)")
-            print("23. Enroll Face")        # <--- New feature here
-            print("24. Train Face Model")   # <--- New feature here
-            print("25. Logout")             # Always second last
-            print("26. Exit")               # Always last
+            print("23. Email Dashboard Charts (PDF)")
+            print("24. Enroll Face")
+            print("25. Logout")
+            print("26. Exit")
 
         elif role == "student":
             print(" 1. Display All Students")
             print(" 2. Search Student by ID or Name")
             print(" 3. View My Course History")
             print(" 4. AI Course Advisor")
-            print(" 5. Logout")  # Always second last
-            print(" 6. Exit")    # Always last
+            print(" 5. Logout")
+            print(" 6. Exit")
 
         choice = input("Enter your choice: ").strip()
 
@@ -1216,9 +1290,10 @@ def user(role):
                 custom_pdf = input("PDF name (blank = timestamped): ").strip() or None
                 export_dashboard_charts_pdf(pdf_name=custom_pdf)
             elif choice == '23':
-                enroll_face_cli()
+                recipient = input("Send dashboard PDF to (email): ").strip()
+                email_dashboard_charts(recipient)
             elif choice == '24':
-                train_faces_cli()
+                enroll_face_cli()
             elif choice == '25':
                 print("Logging out...")
                 return
@@ -1253,6 +1328,8 @@ def user(role):
                 exit()
             else:
                 print("Invalid choice.")
+
+
 
 
 
