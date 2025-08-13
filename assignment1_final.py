@@ -23,6 +23,9 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from datetime import datetime
 from models import FaceAuth
+import cv2
+
+import numpy as np
 
 face_auth = FaceAuth()
 
